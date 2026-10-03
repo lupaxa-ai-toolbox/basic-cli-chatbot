@@ -19,7 +19,7 @@ class Provider(Protocol):
         system_prompt: str,
     ) -> str:
         """Return the full assistant reply."""
-        ...
+        raise NotImplementedError
 
     def stream(
         self,
@@ -28,8 +28,8 @@ class Provider(Protocol):
         system_prompt: str,
     ) -> Iterator[str]:
         """Yield reply text deltas."""
-        ...
+        raise NotImplementedError
 
     def list_models(self) -> list[str]:
         """Return model names accepted by ``--model``."""
-        ...
+        raise NotImplementedError

@@ -26,6 +26,8 @@ jobs:
     name: Link Checker
     uses: the-lupaxa-project/workflows/.github/workflows/reusable-link-checker.yml@master
     secrets: inherit
+    with:
+      whitelist: localhost,127.0.0.1
 
   generate-workflow-summary:
     name: Generate Workflow Summary
