@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lupaxa-basic-cli-chatbot"
+dynamic = ["version"]
+description = "A simple command-line AI chatbot with conversation context."
+readme = "README.md"
+license = { file = "LICENCE" }
+requires-python = ">=3.10"
+
+authors = [
+  { name = "The Lupaxa Project" }
+]
+
+keywords = ["chatbot", "cli", "openai"]
+
+dependencies = [
+  "google-genai",
+  "httpx",
+  "ollama",
+  "openai>=2",
+  "PyYAML",
+  "xai-sdk",
+]
+
+classifiers = [
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/lupaxa-ai-toolbox/basic-cli-chatbot"
+Documentation = "https://github.com/lupaxa-ai-toolbox/basic-cli-chatbot"
+Repository = "https://github.com/lupaxa-ai-toolbox/basic-cli-chatbot"
+Issues = "https://github.com/lupaxa-ai-toolbox/basic-cli-chatbot/issues"
+
+[project.scripts]
+basic-cli-chatbot = "lupaxa.basic_cli_chatbot.cli:main"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.6.0",
+  "mypy>=1.12.0",
+  "hatch>=1.12.0",
+  "bump-my-version>=1.2.0",
+]
+test = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+]
+
+[tool.hatch.version]
+path = "src/lupaxa/basic_cli_chatbot/version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/**",
+  "README.md",
+  "LICENCE",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lupaxa"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src", "tests"]
+mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra -q --disable-warnings"
+testpaths = ["tests"]
+pythonpath = ["src"]
