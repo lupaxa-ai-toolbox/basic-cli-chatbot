@@ -510,9 +510,7 @@ def _run(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 2
-    if args.validate and (
-        args.profile is not None or args.provider is not None or args.model is not None
-    ):
+    if args.validate and (args.profile is not None or args.provider is not None or args.model is not None):
         print(
             "Error: --validate cannot be combined with --profile, --provider, or --model",
             file=sys.stderr,

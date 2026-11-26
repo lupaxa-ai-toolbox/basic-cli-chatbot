@@ -95,11 +95,12 @@ def _config(system_prompt: str) -> types.GenerateContentConfig:
     return types.GenerateContentConfig(system_instruction=system_prompt)
 
 
-def _contents(messages: list[dict[str, str]]) -> list[dict[str, object]]:
-    contents: list[dict[str, object]] = []
+def _contents(messages: list[dict[str, str]]) -> list[types.ContentDict]:
+    contents: list[types.ContentDict] = []
     for message in messages:
         role = "model" if message["role"] == "assistant" else "user"
-        contents.append({"role": role, "parts": [{"text": message["content"]}]})
+        part: types.PartDict = {"text": message["content"]}
+        contents.append({"role": role, "parts": [part]})
     return contents
 
 

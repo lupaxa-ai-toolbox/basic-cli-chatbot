@@ -137,9 +137,7 @@ def test_missing_key(monkeypatch: pytest.MonkeyPatch) -> None:
         (400, "maximum context length exceeded", "the conversation is too long for this model"),
     ],
 )
-def test_catalogue_errors(
-    monkeypatch: pytest.MonkeyPatch, code: int, message: str, match: str
-) -> None:
+def test_catalogue_errors(monkeypatch: pytest.MonkeyPatch, code: int, message: str, match: str) -> None:
     client = _Client()
     client.models._error = errors.APIError(code, {"error": {"message": message, "code": code}})
     provider = _provider(monkeypatch, client)

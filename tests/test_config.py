@@ -72,8 +72,7 @@ def test_loads_profiles_and_leaves_optional_keys_unset(tmp_path: Path) -> None:
 def test_timeout_is_stored_as_a_float(tmp_path: Path) -> None:
     path = _write(
         tmp_path,
-        "default:\n  provider: openai\n  model: m\n  timeout: 30\n"
-        "other:\n  provider: ollama\n  model: m\n  timeout: 30.5\n",
+        "default:\n  provider: openai\n  model: m\n  timeout: 30\nother:\n  provider: ollama\n  model: m\n  timeout: 30.5\n",
     )
     loaded = load_config(path)
     assert loaded.profiles[0].timeout == 30.0
@@ -158,19 +157,13 @@ def test_blank_profile_name(tmp_path: Path) -> None:
 
 
 def test_duplicate_profile_ignores_case(tmp_path: Path) -> None:
-    text = (
-        "Code-Review:\n  provider: openai\n  model: m\n"
-        "code-review:\n  provider: gemini\n  model: n\n"
-    )
+    text = "Code-Review:\n  provider: openai\n  model: m\ncode-review:\n  provider: gemini\n  model: n\n"
     with pytest.raises(ConfigError, match="^duplicate profile 'code-review'$"):
         load_config(_write(tmp_path, text))
 
 
 def test_repeated_yaml_key(tmp_path: Path) -> None:
-    text = (
-        "code-review:\n  provider: openai\n  model: m\n"
-        "code-review:\n  provider: gemini\n  model: n\n"
-    )
+    text = "code-review:\n  provider: openai\n  model: m\ncode-review:\n  provider: gemini\n  model: n\n"
     with pytest.raises(ConfigError, match="^duplicate profile 'code-review'$"):
         load_config(_write(tmp_path, text))
 

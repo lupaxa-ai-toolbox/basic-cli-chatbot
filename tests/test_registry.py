@@ -52,12 +52,8 @@ def test_build_ollama_passes_host() -> None:
 
 
 def test_build_gemini_and_openai_types() -> None:
-    assert isinstance(
-        build("gemini", ollama_host="http://localhost:11434", timeout=60), GeminiProvider
-    )
-    assert isinstance(
-        build("openai", ollama_host="http://localhost:11434", timeout=60), OpenAIProvider
-    )
+    assert isinstance(build("gemini", ollama_host="http://localhost:11434", timeout=60), GeminiProvider)
+    assert isinstance(build("openai", ollama_host="http://localhost:11434", timeout=60), OpenAIProvider)
 
 
 def test_unknown_provider() -> None:

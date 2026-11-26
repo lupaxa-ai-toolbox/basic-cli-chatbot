@@ -90,9 +90,7 @@ def _script_input(monkeypatch: pytest.MonkeyPatch, lines: list[str]) -> None:
     monkeypatch.setattr("builtins.input", lambda _prompt="": next(answers))
 
 
-def test_version_does_not_build(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_version_does_not_build(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     assert main(["--version"]) == 0
     assert main(["--version", "hello"]) == 0
@@ -101,9 +99,7 @@ def test_version_does_not_build(
     assert "hello" not in captured.out
 
 
-def test_missing_provider(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_missing_provider(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     assert main([]) == 2
     assert main(["hello"]) == 2
@@ -121,9 +117,7 @@ def test_missing_model(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFi
     assert capsys.readouterr().err == "Error: model is required\n"
 
 
-def test_flag_beats_env(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_flag_beats_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     monkeypatch.setenv("BASIC_CLI_CHATBOT_PROVIDER", "ollama")
     monkeypatch.setenv("BASIC_CLI_CHATBOT_MODEL", "from-env")
@@ -133,9 +127,7 @@ def test_flag_beats_env(
     assert "model: from-flag" in out
 
 
-def test_show_config_unset(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_show_config_unset(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     assert main(["--show-config"]) == 0
     out = capsys.readouterr().out
@@ -151,19 +143,10 @@ def test_show_config_unset(
 
 def test_show_config_ollama(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--show-config", "--provider", "ollama", "--model", "llama3.2"]) == 0
-    assert capsys.readouterr().out == (
-        "provider: ollama\n"
-        "model: llama3.2\n"
-        "mode: Local\n"
-        "max-context-messages: 0\n"
-        "timeout: 300\n"
-        "ollama-host: http://localhost:11434\n"
-    )
+    assert capsys.readouterr().out == ("provider: ollama\nmodel: llama3.2\nmode: Local\nmax-context-messages: 0\ntimeout: 300\nollama-host: http://localhost:11434\n")
 
 
-def test_show_config_hides_secret(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_show_config_hides_secret(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "sk-secret")
     assert main(["--show-config", "--provider", "openai"]) == 0
     out = capsys.readouterr().out
@@ -182,29 +165,18 @@ def test_show_config_gemini_omits_host(capsys: pytest.CaptureFixture[str]) -> No
     assert "api-key: not configured" in out
 
 
-def test_show_config_grok(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_show_config_grok(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.setenv("XAI_API_KEY", "xai-secret")
     assert main(["--show-config", "--provider", "grok", "--model", "grok-4.6"]) == 0
     out = capsys.readouterr().out
-    assert out == (
-        "provider: grok\n"
-        "model: grok-4.6\n"
-        "mode: Remote\n"
-        "max-context-messages: 0\n"
-        "timeout: 60\n"
-        "api-key: configured\n"
-    )
+    assert out == ("provider: grok\nmodel: grok-4.6\nmode: Remote\nmax-context-messages: 0\ntimeout: 60\napi-key: configured\n")
     assert "xai-secret" not in out
     assert "ollama-host" not in out
 
 
 def test_question_with_show_config(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--provider", "openai", "--model", "m", "--show-config", "hello"]) == 2
-    assert capsys.readouterr().err == (
-        "Error: choose one of a question, --list-models, --show-config, or --validate\n"
-    )
+    assert capsys.readouterr().err == ("Error: choose one of a question, --list-models, --show-config, or --validate\n")
 
 
 def test_negative_context(capsys: pytest.CaptureFixture[str]) -> None:
@@ -212,13 +184,9 @@ def test_negative_context(capsys: pytest.CaptureFixture[str]) -> None:
     assert capsys.readouterr().err == "Error: --max-context-messages must be 0 or greater\n"
 
 
-def test_oneshot_prints_answer_only(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_oneshot_prints_answer_only(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = _patch(monkeypatch, ["four"])
-    assert (
-        main(["--no-stream", "--provider", "openai", "--model", "some-model", "What is 2+2?"]) == 0
-    )
+    assert main(["--no-stream", "--provider", "openai", "--model", "some-model", "What is 2+2?"]) == 0
     captured = capsys.readouterr()
     assert captured.out == "four\n"
     assert captured.err == ""
@@ -227,9 +195,7 @@ def test_oneshot_prints_answer_only(
     assert provider.calls[0]["messages"] == [{"role": "user", "content": "What is 2+2?"}]
 
 
-def test_oneshot_failure(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_oneshot_failure(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _patch(monkeypatch, [ChatError("offline")])
     assert main(["--no-stream", "--provider", "openai", "--model", "m", "hello"]) == 1
     assert capsys.readouterr().err == "Error: offline\n"
@@ -241,9 +207,7 @@ def test_empty_question(capsys: pytest.CaptureFixture[str]) -> None:
     assert capsys.readouterr().err == "Error: question is empty\nError: question is empty\n"
 
 
-def test_oneshot_keyboard_interrupt(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_oneshot_keyboard_interrupt(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _patch(monkeypatch, [KeyboardInterrupt()])
     assert main(["--no-stream", "--provider", "openai", "--model", "m", "hello"]) == 0
     assert capsys.readouterr().out == "\nGoodbye!\n"
@@ -255,9 +219,7 @@ def test_extra_positional_exits_2() -> None:
     assert exc.value.code == 2
 
 
-def test_interactive_keeps_history(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_interactive_keeps_history(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = _patch(monkeypatch, ["first", "second"])
     _script_input(monkeypatch, ["hello", "again", "exit"])
     assert main(["--no-stream", "--provider", "openai", "--model", "some-model"]) == 0
@@ -275,9 +237,7 @@ def test_interactive_keeps_history(
     ]
 
 
-def test_clear_drops_history(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_clear_drops_history(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = _patch(monkeypatch, ["first", "second"])
     _script_input(monkeypatch, ["hello", "clear", "again", "quit"])
     assert main(["--no-stream", "--provider", "openai", "--model", "m"]) == 0
@@ -285,9 +245,7 @@ def test_clear_drops_history(
     assert provider.calls[1]["messages"] == [{"role": "user", "content": "again"}]
 
 
-def test_failed_turn_is_dropped(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_failed_turn_is_dropped(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = _patch(monkeypatch, [ChatError("offline"), "recovered"])
     _script_input(monkeypatch, ["hello", "again", "exit"])
     assert main(["--no-stream", "--provider", "openai", "--model", "m"]) == 0
@@ -295,9 +253,7 @@ def test_failed_turn_is_dropped(
     assert provider.calls[1]["messages"] == [{"role": "user", "content": "again"}]
 
 
-def test_build_failure_retries(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_build_failure_retries(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = FakeProvider(["ok"])
     calls = {"count": 0}
 
@@ -314,9 +270,7 @@ def test_build_failure_retries(
     assert provider.calls[0]["messages"] == [{"role": "user", "content": "again"}]
 
 
-def test_ollama_banner_is_local(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_ollama_banner_is_local(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     def boom(*_args: object, **_kwargs: object) -> None:
         raise AssertionError("hosted client constructed")
 
@@ -378,17 +332,13 @@ def test_list_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixt
     assert capsys.readouterr().out == "llama\nmistral\n"
 
 
-def test_list_models_requires_provider(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_list_models_requires_provider(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     assert main(["--list-models"]) == 2
     assert capsys.readouterr().err == REQUIRED
 
 
-def test_list_models_discovery_unavailable(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_list_models_discovery_unavailable(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _use(
         monkeypatch,
         ListingProvider(error=ChatError("model discovery is unavailable for openai")),
@@ -405,14 +355,10 @@ def test_question_and_list_models(capsys: pytest.CaptureFixture[str]) -> None:
 def test_stream_only_for_chat(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--stream", "--list-models", "--provider", "openai"]) == 2
     assert main(["--stream", "--show-config", "--provider", "openai"]) == 2
-    assert capsys.readouterr().err == (
-        "Error: --stream applies only to a chat\nError: --stream applies only to a chat\n"
-    )
+    assert capsys.readouterr().err == ("Error: --stream applies only to a chat\nError: --stream applies only to a chat\n")
 
 
-def test_slash_commands(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_slash_commands(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = ListingProvider()
     _use(monkeypatch, provider)
     _script_input(monkeypatch, ["/provider", "/model", "/context", "exit"])
@@ -424,9 +370,7 @@ def test_slash_commands(
     assert provider.calls == []
 
 
-def test_context_count_after_a_turn(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_context_count_after_a_turn(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _patch(monkeypatch, ["four"])
     _script_input(monkeypatch, ["/context", "hello", "/context", "exit"])
     assert (
@@ -448,9 +392,7 @@ def test_context_count_after_a_turn(
     assert "context: 2 messages, limit 4" in out
 
 
-def test_chat_streams_by_default(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_chat_streams_by_default(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = DeltaProvider(["fo", "ur"])
     _use(monkeypatch, provider)
     assert main(["--provider", "openai", "--model", "m", "hello"]) == 0
@@ -459,9 +401,7 @@ def test_chat_streams_by_default(
     assert provider.calls == []
 
 
-def test_no_stream_prints_the_whole_reply(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_no_stream_prints_the_whole_reply(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = DeltaProvider(["fo", "ur"])
     _use(monkeypatch, provider)
     assert main(["--no-stream", "--provider", "openai", "--model", "m", "hello"]) == 0
@@ -470,9 +410,7 @@ def test_no_stream_prints_the_whole_reply(
     assert provider.calls[0]["messages"] == [{"role": "user", "content": "hello"}]
 
 
-def test_profile_can_turn_streaming_off(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_profile_can_turn_streaming_off(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     provider = DeltaProvider(["fo", "ur"])
     _use(monkeypatch, provider)
@@ -481,9 +419,7 @@ def test_profile_can_turn_streaming_off(
     assert provider.stream_calls == []
 
 
-def test_stream_joins_deltas(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_stream_joins_deltas(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = DeltaProvider(["fo", "ur"])
     _use(monkeypatch, provider)
     assert main(["--stream", "--provider", "openai", "--model", "m", "hello"]) == 0
@@ -497,9 +433,7 @@ def test_stream_joins_deltas(
     ]
 
 
-def test_stream_fallback_before_text(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_stream_fallback_before_text(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = DeltaProvider([], supports_stream=False)
     _use(monkeypatch, provider)
     _script_input(monkeypatch, ["hello", "exit"])
@@ -513,9 +447,7 @@ def test_stream_fallback_before_text(
     assert "Streaming is unavailable; using a single response." in captured.err
 
 
-def test_oneshot_stream_failure_after_delta(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_oneshot_stream_failure_after_delta(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = DeltaProvider(["fo", ChatError("dropped")])
     _use(monkeypatch, provider)
     assert main(["--stream", "--provider", "openai", "--model", "m", "hello"]) == 1
@@ -545,9 +477,7 @@ class _FailOnce(FakeProvider):
         yield "ok"
 
 
-def test_interactive_stream_failure_drops_turn(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_interactive_stream_failure_drops_turn(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     provider = _FailOnce()
     _use(monkeypatch, provider)
     _script_input(monkeypatch, ["bad", "later", "exit"])
@@ -555,9 +485,7 @@ def test_interactive_stream_failure_drops_turn(
     assert provider.stream_calls[1] == [{"role": "user", "content": "later"}]
 
 
-def test_ollama_oneshot_skips_hosted_sdks(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_ollama_oneshot_skips_hosted_sdks(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     def boom(*_args: object, **_kwargs: object) -> None:
         raise AssertionError("hosted client constructed")
 
@@ -591,9 +519,7 @@ _REVIEW = (
 )
 
 
-def test_version_does_not_read_config(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_version_does_not_read_config(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     def boom(_path: object) -> object:
         raise AssertionError("config read")
 
@@ -602,9 +528,7 @@ def test_version_does_not_read_config(
     assert "config read" not in capsys.readouterr().err
 
 
-def test_profile_supplies_provider_and_ignores_env(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_profile_supplies_provider_and_ignores_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_PROVIDER", "gemini")
     monkeypatch.setenv("BASIC_CLI_CHATBOT_MODEL", "from-env")
     path = _config(tmp_path, _REVIEW)
@@ -620,9 +544,7 @@ def test_profile_supplies_provider_and_ignores_env(
     assert "sk-" not in out
 
 
-def test_profile_rejects_provider_and_model(
-    capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_profile_rejects_provider_and_model(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     assert main(["--profile", "code-review", "--provider", "openai", "--config", path]) == 2
     assert main(["--profile", "code-review", "--model", "m", "--config", path]) == 2
@@ -636,9 +558,7 @@ def test_blank_profile_is_an_error(capsys: pytest.CaptureFixture[str]) -> None:
     assert capsys.readouterr().err == "Error: profile is required\n"
 
 
-def test_default_profile_beats_env(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_default_profile_beats_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_PROVIDER", "gemini")
     monkeypatch.setenv("BASIC_CLI_CHATBOT_MODEL", "from-env")
     path = _config(tmp_path, _REVIEW)
@@ -651,9 +571,7 @@ def test_default_profile_beats_env(
     assert "ollama-host" not in out
 
 
-def test_one_flag_does_not_open_the_file(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_one_flag_does_not_open_the_file(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     def boom(_path: object) -> object:
         raise AssertionError("config read")
 
@@ -663,9 +581,7 @@ def test_one_flag_does_not_open_the_file(
     assert capsys.readouterr().err == "Error: model is required\n"
 
 
-def test_omitted_optional_flag_keeps_the_profile(
-    capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_omitted_optional_flag_keeps_the_profile(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     assert main(["--show-config", "--profile", "code-review", "--config", path]) == 0
     out = capsys.readouterr().out
@@ -673,9 +589,7 @@ def test_omitted_optional_flag_keeps_the_profile(
     assert "ollama-host: http://127.0.0.1:11434\n" in out
 
 
-def test_passed_optional_flags_replace_the_profile(
-    capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_passed_optional_flags_replace_the_profile(capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     assert (
         main(
@@ -698,9 +612,7 @@ def test_passed_optional_flags_replace_the_profile(
     assert "max-context-messages: 9\n" in out
 
 
-def test_default_profile_streams(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_default_profile_streams(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     provider = _patch(monkeypatch, ["four"])
 
@@ -719,9 +631,7 @@ def test_default_profile_streams(
     assert provider.calls == []
 
 
-def test_no_stream_uses_chat(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_no_stream_uses_chat(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     provider = _patch(monkeypatch, ["four"])
     assert main(["--profile", "default", "--config", path, "--no-stream", "ping"]) == 0
@@ -790,9 +700,7 @@ def test_both_stream_flags(capsys: pytest.CaptureFixture[str]) -> None:
     assert capsys.readouterr().err == "Error: --stream cannot be combined with --no-stream\n"
 
 
-def test_list_models_uses_profile_provider(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_list_models_uses_profile_provider(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     path = _config(tmp_path, _REVIEW)
     seen: dict[str, str] = {}
 
@@ -835,9 +743,7 @@ def test_show_config_prints_a_decimal_timeout(capsys: pytest.CaptureFixture[str]
     assert "60.0" not in captured.out
 
 
-def test_timeout_flag_beats_profile_and_env(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_timeout_flag_beats_profile_and_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "9")
     path = _config(
         tmp_path,
@@ -847,9 +753,7 @@ def test_timeout_flag_beats_profile_and_env(
     assert "timeout: 30\n" in capsys.readouterr().out
 
 
-def test_profile_timeout_beats_env(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_profile_timeout_beats_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "nope")
     path = _config(
         tmp_path,
@@ -861,18 +765,14 @@ def test_profile_timeout_beats_env(
     assert "nope" not in captured.err
 
 
-def test_env_timeout_fills_an_omitted_profile_timeout(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_env_timeout_fills_an_omitted_profile_timeout(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", " 12.5 ")
     path = _config(tmp_path, "default:\n  provider: openai\n  model: m\n")
     assert main(["--show-config", "--config", path]) == 0
     assert "timeout: 12.5\n" in capsys.readouterr().out
 
 
-def test_bad_timeout_values(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_bad_timeout_values(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     assert main(["--timeout", "0", "--show-config"]) == 2
     assert main(["--timeout", "-1", "--provider", "openai"]) == 2
     assert main(["--timeout", "inf", "--show-config"]) == 2
@@ -884,9 +784,7 @@ def test_bad_timeout_values(
     assert capsys.readouterr().err == env
 
 
-def test_bad_env_does_not_build(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_bad_env_does_not_build(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     message = "Error: BASIC_CLI_CHATBOT_TIMEOUT must be a number of seconds greater than 0\n"
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "0")
@@ -896,25 +794,19 @@ def test_bad_env_does_not_build(
     assert capsys.readouterr().err == message + message
 
 
-def test_bad_env_is_ignored_when_the_flag_is_set(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_bad_env_is_ignored_when_the_flag_is_set(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "nope")
     assert main(["--show-config", "--timeout", "8"]) == 0
     assert "timeout: 8\n" in capsys.readouterr().out
 
 
-def test_gemini_floor_runs_before_build(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_gemini_floor_runs_before_build(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     _forbid_build(monkeypatch)
     assert main(["--list-models", "--provider", "gemini", "--timeout", "0.0004"]) == 2
     assert capsys.readouterr().err == ("Error: timeout must be at least 1 millisecond for Gemini\n")
 
 
-def test_gemini_accepts_one_millisecond(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_gemini_accepts_one_millisecond(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     seen: dict[str, float] = {}
 
     def fake_build(name: str, *, ollama_host: str, timeout: float) -> FakeProvider:
@@ -929,9 +821,7 @@ def test_gemini_accepts_one_millisecond(
     assert capsys.readouterr().out == "gemini-a\n"
 
 
-def test_catalog_default_reaches_build(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_catalog_default_reaches_build(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     monkeypatch.delenv("BASIC_CLI_CHATBOT_TIMEOUT", raising=False)
     seen: dict[str, float] = {}
 
@@ -956,9 +846,7 @@ def test_timeout_zero_blocks_validate(capsys: pytest.CaptureFixture[str], tmp_pa
     assert "config: ok" not in captured.out
 
 
-def test_valid_timeout_still_validates(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
-) -> None:
+def test_valid_timeout_still_validates(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "nope")
     path = _config(tmp_path, "default:\n  provider: openai\n  model: m\n  timeout: 10\n")
     assert main(["--validate", "--timeout", "3", "--config", path]) == 0

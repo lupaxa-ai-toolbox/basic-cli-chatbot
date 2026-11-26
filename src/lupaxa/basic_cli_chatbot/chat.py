@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from .providers.base import Provider
 
-SYSTEM_PROMPT = (
-    "You are a helpful general-purpose assistant. Answer questions clearly and concisely."
-)
+SYSTEM_PROMPT = "You are a helpful general-purpose assistant. Answer questions clearly and concisely."
 
 
 def trim(conversation: list[dict[str, str]], max_context_messages: int) -> None:
@@ -19,11 +17,7 @@ def trim(conversation: list[dict[str, str]], max_context_messages: int) -> None:
         return
     limit = max_context_messages - (max_context_messages % 2)
     while len(conversation) > limit:
-        complete_pair = (
-            len(conversation) >= 2
-            and conversation[0].get("role") == "user"
-            and conversation[1].get("role") == "assistant"
-        )
+        complete_pair = len(conversation) >= 2 and conversation[0].get("role") == "user" and conversation[1].get("role") == "assistant"
         if not complete_pair:
             break
         if conversation[-1].get("role") == "user" and len(conversation) < 3:

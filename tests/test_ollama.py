@@ -105,9 +105,7 @@ def test_module_does_not_name_hosted_sdks() -> None:
     assert "xai_sdk" not in text
 
 
-def _expect_timeout(
-    timeout: object, connect: float, read: float, write: float, pool: float
-) -> None:
+def _expect_timeout(timeout: object, connect: float, read: float, write: float, pool: float) -> None:
     assert isinstance(timeout, httpx.Timeout)
     assert timeout.connect == connect
     assert timeout.read == read

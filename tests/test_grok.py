@@ -192,9 +192,7 @@ def test_stream_yields_deltas(monkeypatch: pytest.MonkeyPatch) -> None:
         {"chunks": [_Chunk("fo"), _Chunk(""), _Chunk("ur")]},
     )
     provider = GrokProvider(60)
-    assert list(
-        provider.stream([{"role": "user", "content": "hi"}], "grok-4.6", SYSTEM_PROMPT)
-    ) == [
+    assert list(provider.stream([{"role": "user", "content": "hi"}], "grok-4.6", SYSTEM_PROMPT)) == [
         "fo",
         "ur",
     ]

@@ -11,9 +11,7 @@ import yaml
 
 from .providers import KNOWN
 
-_ALLOWED = frozenset(
-    {"provider", "model", "ollama-host", "max-context-messages", "stream", "timeout"}
-)
+_ALLOWED = frozenset({"provider", "model", "ollama-host", "max-context-messages", "stream", "timeout"})
 
 
 class ConfigError(Exception):

@@ -167,7 +167,8 @@ def test_empty_reply(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 class _HTTPRequest:
-    pass
+    def __init__(self) -> None:
+        self.headers: dict[str, str] = {}
 
 
 class _HTTPHeaders:
@@ -180,6 +181,8 @@ class _HTTPResponse:
         self.status_code = status_code
         self.request = _HTTPRequest()
         self.headers = _HTTPHeaders()
+        self.history: list[object] = []
+        self.next_request = None
 
 
 def _status(cls: type[APIStatusError], status: int, message: str) -> APIStatusError:
