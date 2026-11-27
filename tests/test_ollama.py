@@ -13,14 +13,7 @@ from lupaxa.basic_cli_chatbot.chat import SYSTEM_PROMPT
 from lupaxa.basic_cli_chatbot.providers.errors import ChatError
 from lupaxa.basic_cli_chatbot.providers.ollama import OllamaProvider
 
-_ENV_VARS = (
-    "BASIC_CLI_CHATBOT_PROVIDER",
-    "BASIC_CLI_CHATBOT_MODEL",
-    "BASIC_CLI_CHATBOT_TIMEOUT",
-    "OPENAI_API_KEY",
-    "GEMINI_API_KEY",
-    "XAI_API_KEY",
-)
+_ENV_VARS = ("BASIC_CLI_CHATBOT_PROVIDER", "BASIC_CLI_CHATBOT_MODEL", "BASIC_CLI_CHATBOT_TIMEOUT", "OPENAI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
 @pytest.fixture(autouse=True)
@@ -177,10 +170,7 @@ def test_other_response_error_is_one_line(monkeypatch: pytest.MonkeyPatch) -> No
 
 
 def test_list_models(monkeypatch: pytest.MonkeyPatch) -> None:
-    _install(
-        monkeypatch,
-        {"listed": _ListResponse([_Listed("llama3.2:latest"), _Listed("mistral")])},
-    )
+    _install(monkeypatch, {"listed": _ListResponse([_Listed("llama3.2:latest"), _Listed("mistral")])})
     provider = OllamaProvider("http://localhost:11434", timeout=300)
     assert provider.list_models() == ["llama3.2:latest", "mistral"]
     assert _FakeClient.latest.closed is True

@@ -22,12 +22,7 @@ class OllamaProvider:
         self.host = host.rstrip("/")
         self.timeout = timeout
 
-    def chat(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> str:
+    def chat(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> str:
         payload = _messages(messages, system_prompt)
         with _session(self, model) as client:
             try:
@@ -39,12 +34,7 @@ class OllamaProvider:
                 raise ChatError("the provider returned an invalid response")
             return str(content)
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         payload = _messages(messages, system_prompt)
         with _session(self, model) as client:
             for chunk in client.chat(model=model, messages=payload, stream=True):
@@ -68,18 +58,10 @@ class OllamaProvider:
 
 
 def _timeout(seconds: float) -> httpx.Timeout:
-    return httpx.Timeout(
-        connect=min(5.0, seconds),
-        read=seconds,
-        write=min(30.0, seconds),
-        pool=min(5.0, seconds),
-    )
+    return httpx.Timeout(connect=min(5.0, seconds), read=seconds, write=min(30.0, seconds), pool=min(5.0, seconds))
 
 
-def _messages(
-    messages: list[dict[str, str]],
-    system_prompt: str,
-) -> list[dict[str, str]]:
+def _messages(messages: list[dict[str, str]], system_prompt: str) -> list[dict[str, str]]:
     return [{"role": "system", "content": system_prompt}, *list(messages)]
 
 

@@ -57,13 +57,7 @@ def test_ask_passes_system_prompt_after_trim() -> None:
         {"role": "assistant", "content": "b"},
     ]
     provider = _Provider()
-    answer = ask(
-        "three",
-        conversation,
-        cast(Provider, provider),
-        "m",
-        max_context_messages=2,
-    )
+    answer = ask("three", conversation, cast(Provider, provider), "m", max_context_messages=2)
     assert answer == "ok"
     assert provider.prompt == SYSTEM_PROMPT
     assert provider.messages == [{"role": "user", "content": "three"}]

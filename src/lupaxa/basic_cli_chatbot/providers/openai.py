@@ -22,11 +22,7 @@ from openai import (
 from openai.types.responses import ResponseInputParam
 
 from .catalog import CATALOG
-from .errors import (
-    ChatError,
-    looks_like_context_limit,
-    one_line,
-)
+from .errors import ChatError, looks_like_context_limit, one_line
 
 
 class OpenAIProvider:
@@ -38,20 +34,10 @@ class OpenAIProvider:
     def __init__(self, timeout: float) -> None:
         self.timeout = timeout
 
-    def chat(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> str:
+    def chat(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> str:
         client = _client(self.timeout)
         try:
-            response = client.responses.create(
-                model=model,
-                instructions=system_prompt,
-                input=cast(ResponseInputParam, list(messages)),
-                timeout=self.timeout,
-            )
+            response = client.responses.create(model=model, instructions=system_prompt, input=cast(ResponseInputParam, list(messages)), timeout=self.timeout)
         except ChatError:
             raise
         except OpenAIError as exc:
@@ -63,20 +49,10 @@ class OpenAIProvider:
             raise ChatError("the provider returned an invalid response")
         return response.output_text
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         client = _client(self.timeout)
         try:
-            with client.responses.stream(
-                model=model,
-                instructions=system_prompt,
-                input=cast(ResponseInputParam, list(messages)),
-                timeout=self.timeout,
-            ) as stream:
+            with client.responses.stream(model=model, instructions=system_prompt, input=cast(ResponseInputParam, list(messages)), timeout=self.timeout) as stream:
                 for event in stream:
                     if getattr(event, "type", "") != "response.output_text.delta":
                         continue

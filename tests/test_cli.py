@@ -17,14 +17,7 @@ REQUIRED = "Error: provider is required (openai, gemini, grok, ollama)\n"
 
 @pytest.fixture(autouse=True)
 def _clear_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name in (
-        "BASIC_CLI_CHATBOT_PROVIDER",
-        "BASIC_CLI_CHATBOT_MODEL",
-        "BASIC_CLI_CHATBOT_TIMEOUT",
-        "OPENAI_API_KEY",
-        "GEMINI_API_KEY",
-        "XAI_API_KEY",
-    ):
+    for name in ("BASIC_CLI_CHATBOT_PROVIDER", "BASIC_CLI_CHATBOT_MODEL", "BASIC_CLI_CHATBOT_TIMEOUT", "OPENAI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY"):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -38,12 +31,7 @@ class FakeProvider:
         self.outcomes = outcomes
         self.calls: list[dict[str, object]] = []
 
-    def chat(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> str:
+    def chat(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> str:
         self.calls.append(
             {
                 "messages": list(messages),
@@ -56,12 +44,7 @@ class FakeProvider:
             raise outcome
         return outcome
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         raise ChatError("model discovery is unavailable for openai")
 
     def list_models(self) -> list[str]:
@@ -304,12 +287,7 @@ class DeltaProvider(FakeProvider):
         self.stream_calls: list[list[dict[str, str]]] = []
         self._streams = 0
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         self.stream_calls.append(list(messages))
         self._streams += 1
         for item in self._deltas:
@@ -320,10 +298,7 @@ class DeltaProvider(FakeProvider):
 
 
 def _use(monkeypatch: pytest.MonkeyPatch, provider: FakeProvider) -> None:
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.cli.build",
-        lambda name, *, ollama_host, timeout: provider,
-    )
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.cli.build", lambda name, *, ollama_host, timeout: provider)
 
 
 def test_list_models(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
@@ -339,10 +314,7 @@ def test_list_models_requires_provider(monkeypatch: pytest.MonkeyPatch, capsys: 
 
 
 def test_list_models_discovery_unavailable(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
-    _use(
-        monkeypatch,
-        ListingProvider(error=ChatError("model discovery is unavailable for openai")),
-    )
+    _use(monkeypatch, ListingProvider(error=ChatError("model discovery is unavailable for openai")))
     assert main(["--list-models", "--provider", "openai"]) == 1
     assert capsys.readouterr().err == "Error: model discovery is unavailable for openai\n"
 
@@ -463,12 +435,7 @@ class _FailOnce(FakeProvider):
         self.stream_calls: list[list[dict[str, str]]] = []
         self._n = 0
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         self.stream_calls.append(list(messages))
         self._n += 1
         if self._n == 1:
@@ -616,11 +583,7 @@ def test_default_profile_streams(monkeypatch: pytest.MonkeyPatch, capsys: pytest
     path = _config(tmp_path, _REVIEW)
     provider = _patch(monkeypatch, ["four"])
 
-    def stream(
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ):
+    def stream(messages: list[dict[str, str]], model: str, system_prompt: str):
         del messages, model, system_prompt
         yield "fo"
         yield "ur"
@@ -639,9 +602,7 @@ def test_no_stream_uses_chat(monkeypatch: pytest.MonkeyPatch, capsys: pytest.Cap
     assert provider.calls[0]["model"] == "from-default"
 
 
-def test_missing_default_path_keeps_provider_required(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
+def test_missing_default_path_keeps_provider_required(capsys: pytest.CaptureFixture[str]) -> None:
     assert main([]) == 2
     assert capsys.readouterr().err == REQUIRED
 
@@ -745,20 +706,14 @@ def test_show_config_prints_a_decimal_timeout(capsys: pytest.CaptureFixture[str]
 
 def test_timeout_flag_beats_profile_and_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "9")
-    path = _config(
-        tmp_path,
-        "default:\n  provider: openai\n  model: m\n  timeout: 15\n",
-    )
+    path = _config(tmp_path, "default:\n  provider: openai\n  model: m\n  timeout: 15\n")
     assert main(["--show-config", "--config", path, "--timeout", "30"]) == 0
     assert "timeout: 30\n" in capsys.readouterr().out
 
 
 def test_profile_timeout_beats_env(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path) -> None:
     monkeypatch.setenv("BASIC_CLI_CHATBOT_TIMEOUT", "nope")
-    path = _config(
-        tmp_path,
-        "default:\n  provider: openai\n  model: m\n  timeout: 15\n",
-    )
+    path = _config(tmp_path, "default:\n  provider: openai\n  model: m\n  timeout: 15\n")
     assert main(["--show-config", "--config", path]) == 0
     captured = capsys.readouterr()
     assert "timeout: 15\n" in captured.out
@@ -853,8 +808,6 @@ def test_valid_timeout_still_validates(monkeypatch: pytest.MonkeyPatch, capsys: 
     assert capsys.readouterr().out == "config: ok\nprofiles: default\n"
 
 
-def test_missing_model_wins_over_the_gemini_floor(
-    capsys: pytest.CaptureFixture[str],
-) -> None:
+def test_missing_model_wins_over_the_gemini_floor(capsys: pytest.CaptureFixture[str]) -> None:
     assert main(["--provider", "gemini", "--timeout", "0.0004"]) == 2
     assert capsys.readouterr().err == "Error: model is required\n"

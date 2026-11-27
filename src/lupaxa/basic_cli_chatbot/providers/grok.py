@@ -24,19 +24,10 @@ class GrokProvider:
     def __init__(self, timeout: float) -> None:
         self.timeout = timeout
 
-    def chat(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> str:
+    def chat(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> str:
         payload = _messages(messages, system_prompt)
         with _session(self.timeout, model) as client:
-            chat = client.chat.create(
-                model=model,
-                messages=payload,
-                store_messages=False,
-            )
+            chat = client.chat.create(model=model, messages=payload, store_messages=False)
             response = chat.sample()
             try:
                 content = response.content
@@ -46,19 +37,10 @@ class GrokProvider:
                 raise ChatError("the provider returned an invalid response")
             return str(content)
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         payload = _messages(messages, system_prompt)
         with _session(self.timeout, model) as client:
-            chat = client.chat.create(
-                model=model,
-                messages=payload,
-                store_messages=False,
-            )
+            chat = client.chat.create(model=model, messages=payload, store_messages=False)
             for _response, chunk in chat.stream():
                 try:
                     content = chunk.content
@@ -78,10 +60,7 @@ class GrokProvider:
             return names
 
 
-def _messages(
-    messages: list[dict[str, str]],
-    system_prompt: str,
-) -> list[chat_pb2.Message]:
+def _messages(messages: list[dict[str, str]], system_prompt: str) -> list[chat_pb2.Message]:
     payload: list[chat_pb2.Message] = [system(system_prompt)]
     for message in messages:
         content = message["content"]
@@ -99,11 +78,7 @@ def _client(timeout: float) -> Client:
     key = os.environ.get("XAI_API_KEY", "").strip()
     if not key:
         raise ChatError("XAI_API_KEY is not configured")
-    return Client(
-        api_key=key,
-        timeout=timeout,
-        channel_options=[("grpc.enable_retries", 0)],
-    )
+    return Client(api_key=key, timeout=timeout, channel_options=[("grpc.enable_retries", 0)])
 
 
 @contextmanager

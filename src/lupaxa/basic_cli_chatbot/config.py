@@ -43,11 +43,7 @@ class _Loader(yaml.SafeLoader):
     """Safe loader that rejects a repeated string key."""
 
 
-def _construct_mapping(
-    loader: yaml.SafeLoader,
-    node: yaml.MappingNode,
-    deep: bool = False,
-) -> dict[object, object]:
+def _construct_mapping(loader: yaml.SafeLoader, node: yaml.MappingNode, deep: bool = False) -> dict[object, object]:
     mapping: dict[object, object] = {}
     seen: set[str] = set()
     for key_node, value_node in node.value:

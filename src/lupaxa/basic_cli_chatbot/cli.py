@@ -8,13 +8,7 @@ import os
 import sys
 from pathlib import Path
 
-from .chat import (
-    SYSTEM_PROMPT,
-    ask,
-    begin_turn,
-    fail_turn,
-    finish_turn,
-)
+from .chat import SYSTEM_PROMPT, ask, begin_turn, fail_turn, finish_turn
 from .config import ConfigError, ConfigFile, default_config_path, find_profile, load_config
 from .providers import KNOWN, Provider, build
 from .providers.catalog import CATALOG, gemini_timeout_ms
@@ -24,66 +18,19 @@ from .version import __version__
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="A simple command-line AI chatbot.")
-    parser.add_argument(
-        "--provider",
-        help="Chat provider: openai, gemini, grok, or ollama.",
-    )
+    parser.add_argument("--provider", help="Chat provider: openai, gemini, grok, or ollama.")
     parser.add_argument("--model", help="Model name for the selected provider.")
-    parser.add_argument(
-        "--config",
-        help="Profile file. Defaults to the user config path.",
-    )
-    parser.add_argument(
-        "--profile",
-        help="Profile name from the config file.",
-    )
-    parser.add_argument(
-        "--ollama-host",
-        default=None,
-        help="Ollama server URL (default: http://localhost:11434).",
-    )
-    parser.add_argument(
-        "--max-context-messages",
-        type=int,
-        default=None,
-        help="Maximum user and assistant rows to keep. 0 means unlimited.",
-    )
-    parser.add_argument(
-        "--timeout",
-        type=float,
-        default=None,
-        help="Reply timeout in seconds.",
-    )
-    parser.add_argument(
-        "--show-config",
-        action="store_true",
-        help="Print the effective settings and exit.",
-    )
-    parser.add_argument(
-        "--validate",
-        action="store_true",
-        help="Check the config file and exit.",
-    )
-    parser.add_argument(
-        "--list-models",
-        action="store_true",
-        help="List model names for the selected provider and exit.",
-    )
-    parser.add_argument(
-        "--stream",
-        action="store_true",
-        help="Stream the reply as it arrives (default).",
-    )
-    parser.add_argument(
-        "--no-stream",
-        action="store_true",
-        help="Print the reply in one piece.",
-    )
-    parser.add_argument(
-        "--version",
-        action="store_true",
-        help="Show version information and exit.",
-    )
+    parser.add_argument("--config", help="Profile file. Defaults to the user config path.")
+    parser.add_argument("--profile", help="Profile name from the config file.")
+    parser.add_argument("--ollama-host", default=None, help="Ollama server URL (default: http://localhost:11434).")
+    parser.add_argument("--max-context-messages", type=int, default=None, help="Maximum user and assistant rows to keep. 0 means unlimited.")
+    parser.add_argument("--timeout", type=float, default=None, help="Reply timeout in seconds.")
+    parser.add_argument("--show-config", action="store_true", help="Print the effective settings and exit.")
+    parser.add_argument("--validate", action="store_true", help="Check the config file and exit.")
+    parser.add_argument("--list-models", action="store_true", help="List model names for the selected provider and exit.")
+    parser.add_argument("--stream", action="store_true", help="Stream the reply as it arrives (default).")
+    parser.add_argument("--no-stream", action="store_true", help="Print the reply in one piece.")
+    parser.add_argument("--version", action="store_true", help="Show version information and exit.")
     parser.add_argument("question", nargs="?", help="Ask one question and exit.")
     return parser
 
@@ -129,11 +76,7 @@ def _env_timeout() -> float | None:
     return value
 
 
-def _resolve_timeout(
-    flag: float | None,
-    profile_value: float | None,
-    provider_name: str | None,
-) -> float | None:
+def _resolve_timeout(flag: float | None, profile_value: float | None, provider_name: str | None) -> float | None:
     if flag is not None:
         return flag
     if profile_value is not None:
@@ -167,13 +110,7 @@ def _reject_gemini_timeout(provider_name: str, timeout: float) -> bool:
 
 
 def format_show_config(
-    provider: str | None,
-    model: str | None,
-    max_context_messages: int,
-    ollama_host: str,
-    timeout: float | None,
-    profile: str | None = None,
-    config_path: Path | None = None,
+    provider: str | None, model: str | None, max_context_messages: int, ollama_host: str, timeout: float | None, profile: str | None = None, config_path: Path | None = None
 ) -> None:
     """Print the effective settings. Never print a secret."""
     facts = CATALOG.get(provider) if provider is not None else None
@@ -216,13 +153,7 @@ def _close_stream(text: str, *, interactive: bool) -> None:
         print(flush=True)
 
 
-def _collect_stream(
-    conversation: list[dict[str, str]],
-    provider: Provider,
-    model: str,
-    *,
-    interactive: bool,
-) -> tuple[str, bool]:
+def _collect_stream(conversation: list[dict[str, str]], provider: Provider, model: str, *, interactive: bool) -> tuple[str, bool]:
     """Return the reply and whether its text was already written."""
     if not provider.supports_stream:
         _print_stream_notice(interactive=interactive)
@@ -248,23 +179,10 @@ def _collect_stream(
     return text, True
 
 
-def _stream_reply(
-    question: str,
-    conversation: list[dict[str, str]],
-    provider: Provider,
-    model: str,
-    max_context_messages: int,
-    *,
-    interactive: bool,
-) -> None:
+def _stream_reply(question: str, conversation: list[dict[str, str]], provider: Provider, model: str, max_context_messages: int, *, interactive: bool) -> None:
     begin_turn(question, conversation, max_context_messages)
     try:
-        answer, streamed = _collect_stream(
-            conversation,
-            provider,
-            model,
-            interactive=interactive,
-        )
+        answer, streamed = _collect_stream(conversation, provider, model, interactive=interactive)
     except Exception:
         fail_turn(conversation)
         raise
@@ -273,16 +191,7 @@ def _stream_reply(
         _print_reply(answer, interactive=interactive)
 
 
-def run_oneshot(
-    question: str,
-    provider_name: str,
-    model: str,
-    ollama_host: str,
-    max_context_messages: int,
-    *,
-    stream: bool,
-    timeout: float,
-) -> int:
+def run_oneshot(question: str, provider_name: str, model: str, ollama_host: str, max_context_messages: int, *, stream: bool, timeout: float) -> int:
     stripped = question.strip()
     if not stripped:
         print("Error: question is empty", file=sys.stderr)
@@ -290,22 +199,9 @@ def run_oneshot(
     try:
         provider = build(provider_name, ollama_host=ollama_host, timeout=timeout)
         if stream:
-            _stream_reply(
-                stripped,
-                [],
-                provider,
-                model,
-                max_context_messages,
-                interactive=False,
-            )
+            _stream_reply(stripped, [], provider, model, max_context_messages, interactive=False)
         else:
-            answer = ask(
-                stripped,
-                [],
-                provider,
-                model,
-                max_context_messages=max_context_messages,
-            )
+            answer = ask(stripped, [], provider, model, max_context_messages=max_context_messages)
             print(answer)
     except KeyboardInterrupt:
         print("\nGoodbye!")
@@ -331,14 +227,7 @@ def run_list_models(provider_name: str, ollama_host: str, *, timeout: float) -> 
     return 0
 
 
-def _print_slash(
-    command: str,
-    *,
-    provider_name: str,
-    model: str,
-    conversation: list[dict[str, str]],
-    max_context_messages: int,
-) -> bool:
+def _print_slash(command: str, *, provider_name: str, model: str, conversation: list[dict[str, str]], max_context_messages: int) -> bool:
     if command == "/context":
         limit = "unlimited" if max_context_messages == 0 else str(max_context_messages)
         print(f"context: {len(conversation)} messages, limit {limit}")
@@ -352,15 +241,7 @@ def _print_slash(
     return False
 
 
-def run_interactive(
-    provider_name: str,
-    model: str,
-    ollama_host: str,
-    max_context_messages: int,
-    *,
-    stream: bool,
-    timeout: float,
-) -> int:
+def run_interactive(provider_name: str, model: str, ollama_host: str, max_context_messages: int, *, stream: bool, timeout: float) -> int:
     mode = CATALOG[provider_name].mode
     print("Simple AI Chatbot")
     print(f"Provider: {provider_name}")
@@ -386,13 +267,7 @@ def run_interactive(
             conversation.clear()
             print("\nConversation context cleared.\n")
             continue
-        if _print_slash(
-            command,
-            provider_name=provider_name,
-            model=model,
-            conversation=conversation,
-            max_context_messages=max_context_messages,
-        ):
+        if _print_slash(command, provider_name=provider_name, model=model, conversation=conversation, max_context_messages=max_context_messages):
             continue
         if provider is None:
             try:
@@ -405,22 +280,9 @@ def run_interactive(
                 continue
         try:
             if stream:
-                _stream_reply(
-                    question,
-                    conversation,
-                    provider,
-                    model,
-                    max_context_messages,
-                    interactive=True,
-                )
+                _stream_reply(question, conversation, provider, model, max_context_messages, interactive=True)
             else:
-                answer = ask(
-                    question,
-                    conversation,
-                    provider,
-                    model,
-                    max_context_messages=max_context_messages,
-                )
+                answer = ask(question, conversation, provider, model, max_context_messages=max_context_messages)
                 print(f"\nAI: {answer}\n")
         except KeyboardInterrupt:
             print("\nGoodbye!")
@@ -490,10 +352,7 @@ def main(argv: list[str] | None = None) -> int:
 def _run(args: argparse.Namespace) -> int:
     choices = (args.question is not None, args.list_models, args.show_config, args.validate)
     if sum(choices) > 1:
-        print(
-            "Error: choose one of a question, --list-models, --show-config, or --validate",
-            file=sys.stderr,
-        )
+        print("Error: choose one of a question, --list-models, --show-config, or --validate", file=sys.stderr)
         return 2
     if (args.stream or args.no_stream) and (args.list_models or args.show_config or args.validate):
         print("Error: --stream applies only to a chat", file=sys.stderr)
@@ -505,16 +364,10 @@ def _run(args: argparse.Namespace) -> int:
         print("Error: --max-context-messages must be 0 or greater", file=sys.stderr)
         return 2
     if args.timeout is not None and (not math.isfinite(args.timeout) or args.timeout <= 0):
-        print(
-            "Error: --timeout must be a number of seconds greater than 0",
-            file=sys.stderr,
-        )
+        print("Error: --timeout must be a number of seconds greater than 0", file=sys.stderr)
         return 2
     if args.validate and (args.profile is not None or args.provider is not None or args.model is not None):
-        print(
-            "Error: --validate cannot be combined with --profile, --provider, or --model",
-            file=sys.stderr,
-        )
+        print("Error: --validate cannot be combined with --profile, --provider, or --model", file=sys.stderr)
         return 2
     if args.profile is not None and (args.provider is not None or args.model is not None):
         print("Error: --profile cannot be combined with --provider or --model", file=sys.stderr)
@@ -572,15 +425,7 @@ def _run(args: argparse.Namespace) -> int:
     timeout = _resolve_timeout(args.timeout, profile_timeout, provider_name)
 
     if args.show_config:
-        format_show_config(
-            provider_name,
-            model,
-            max_context,
-            ollama_host,
-            timeout,
-            profile=None if profile is None else profile.name,
-            config_path=config_path,
-        )
+        format_show_config(provider_name, model, max_context, ollama_host, timeout, profile=None if profile is None else profile.name, config_path=config_path)
         return 0
     names = ", ".join(KNOWN)
     if provider_name is None:
@@ -592,31 +437,12 @@ def _run(args: argparse.Namespace) -> int:
     if args.list_models:
         if timeout is None or _reject_gemini_timeout(provider_name, timeout):
             return 2
-        return run_list_models(
-            provider_name,
-            ollama_host,
-            timeout=timeout,
-        )
+        return run_list_models(provider_name, ollama_host, timeout=timeout)
     if model is None:
         print("Error: model is required", file=sys.stderr)
         return 2
     if timeout is None or _reject_gemini_timeout(provider_name, timeout):
         return 2
     if args.question is None:
-        return run_interactive(
-            provider_name,
-            model,
-            ollama_host,
-            max_context,
-            stream=stream,
-            timeout=timeout,
-        )
-    return run_oneshot(
-        args.question,
-        provider_name,
-        model,
-        ollama_host,
-        max_context,
-        stream=stream,
-        timeout=timeout,
-    )
+        return run_interactive(provider_name, model, ollama_host, max_context, stream=stream, timeout=timeout)
+    return run_oneshot(args.question, provider_name, model, ollama_host, max_context, stream=stream, timeout=timeout)

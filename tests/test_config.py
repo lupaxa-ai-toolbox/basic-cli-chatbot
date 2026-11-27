@@ -7,21 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from lupaxa.basic_cli_chatbot.config import (
-    ConfigError,
-    default_config_path,
-    find_profile,
-    load_config,
-)
+from lupaxa.basic_cli_chatbot.config import ConfigError, default_config_path, find_profile, load_config
 
-_ENV_VARS = (
-    "BASIC_CLI_CHATBOT_PROVIDER",
-    "BASIC_CLI_CHATBOT_MODEL",
-    "BASIC_CLI_CHATBOT_TIMEOUT",
-    "OPENAI_API_KEY",
-    "GEMINI_API_KEY",
-    "XAI_API_KEY",
-)
+_ENV_VARS = ("BASIC_CLI_CHATBOT_PROVIDER", "BASIC_CLI_CHATBOT_MODEL", "BASIC_CLI_CHATBOT_TIMEOUT", "OPENAI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
 @pytest.fixture(autouse=True)
@@ -70,10 +58,7 @@ def test_loads_profiles_and_leaves_optional_keys_unset(tmp_path: Path) -> None:
 
 
 def test_timeout_is_stored_as_a_float(tmp_path: Path) -> None:
-    path = _write(
-        tmp_path,
-        "default:\n  provider: openai\n  model: m\n  timeout: 30\nother:\n  provider: ollama\n  model: m\n  timeout: 30.5\n",
-    )
+    path = _write(tmp_path, "default:\n  provider: openai\n  model: m\n  timeout: 30\nother:\n  provider: ollama\n  model: m\n  timeout: 30.5\n")
     loaded = load_config(path)
     assert loaded.profiles[0].timeout == 30.0
     assert isinstance(loaded.profiles[0].timeout, float)
@@ -179,10 +164,7 @@ def test_provider_and_model_problems(tmp_path: Path) -> None:
         ("draft:\n  model: m\n", "profile 'draft' is missing provider"),
         ("draft:\n  provider: '  '\n  model: m\n", "profile 'draft' is missing provider"),
         ("draft:\n  provider: 1\n  model: m\n", "profile 'draft' provider must be a string"),
-        (
-            "draft:\n  provider: claude\n  model: m\n",
-            "profile 'draft' has unknown provider 'claude' (openai, gemini, grok, ollama)",
-        ),
+        ("draft:\n  provider: claude\n  model: m\n", "profile 'draft' has unknown provider 'claude' (openai, gemini, grok, ollama)"),
         ("draft:\n  provider: openai\n", "profile 'draft' is missing model"),
         ("draft:\n  provider: openai\n  model: [a]\n", "profile 'draft' model must be a string"),
     )
@@ -193,22 +175,10 @@ def test_provider_and_model_problems(tmp_path: Path) -> None:
 
 def test_optional_field_problems(tmp_path: Path) -> None:
     cases = (
-        (
-            "draft:\n  provider: openai\n  model: m\n  ollama-host: ' '\n",
-            "profile 'draft' ollama-host must be a non-empty string",
-        ),
-        (
-            "draft:\n  provider: openai\n  model: m\n  max-context-messages: true\n",
-            "profile 'draft' max-context-messages must be an integer",
-        ),
-        (
-            "draft:\n  provider: openai\n  model: m\n  max-context-messages: -1\n",
-            "profile 'draft' max-context-messages must be 0 or greater",
-        ),
-        (
-            "draft:\n  provider: openai\n  model: m\n  stream: 'yes'\n",
-            "profile 'draft' stream must be true or false",
-        ),
+        ("draft:\n  provider: openai\n  model: m\n  ollama-host: ' '\n", "profile 'draft' ollama-host must be a non-empty string"),
+        ("draft:\n  provider: openai\n  model: m\n  max-context-messages: true\n", "profile 'draft' max-context-messages must be an integer"),
+        ("draft:\n  provider: openai\n  model: m\n  max-context-messages: -1\n", "profile 'draft' max-context-messages must be 0 or greater"),
+        ("draft:\n  provider: openai\n  model: m\n  stream: 'yes'\n", "profile 'draft' stream must be true or false"),
     )
     for text, message in cases:
         with pytest.raises(ConfigError, match=f"^{re.escape(message)}$"):
@@ -233,10 +203,7 @@ def test_unreadable_file(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
 
 
 def test_unknown_profile_lists_file_spellings(tmp_path: Path) -> None:
-    path = _write(
-        tmp_path,
-        "Default:\n  provider: openai\n  model: m\nDraft:\n  provider: ollama\n  model: x\n",
-    )
+    path = _write(tmp_path, "Default:\n  provider: openai\n  model: m\nDraft:\n  provider: ollama\n  model: x\n")
     loaded = load_config(path)
     with pytest.raises(ConfigError, match=r"^unknown profile 'nope' \(Default, Draft\)$"):
         find_profile(loaded, " nope ")

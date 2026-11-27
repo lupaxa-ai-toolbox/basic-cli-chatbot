@@ -12,21 +12,11 @@ class Provider(Protocol):
     mode: str
     supports_stream: bool
 
-    def chat(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> str:
+    def chat(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> str:
         """Return the full assistant reply."""
         raise NotImplementedError
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         """Yield reply text deltas."""
         raise NotImplementedError
 

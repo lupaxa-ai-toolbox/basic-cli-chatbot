@@ -10,11 +10,7 @@ from google import genai
 from google.genai import errors, types
 
 from .catalog import CATALOG, gemini_timeout_ms
-from .errors import (
-    ChatError,
-    looks_like_context_limit,
-    one_line,
-)
+from .errors import ChatError, looks_like_context_limit, one_line
 
 
 class GeminiProvider:
@@ -26,19 +22,10 @@ class GeminiProvider:
     def __init__(self, timeout: float) -> None:
         self.timeout = timeout
 
-    def chat(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> str:
+    def chat(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> str:
         client = _client(self.timeout)
         try:
-            response = client.models.generate_content(
-                model=model,
-                contents=_contents(messages),
-                config=_config(system_prompt),
-            )
+            response = client.models.generate_content(model=model, contents=_contents(messages), config=_config(system_prompt))
         except Exception as exc:
             raise _guard(exc, model) from None
         raw = response.text
@@ -46,19 +33,10 @@ class GeminiProvider:
             raise ChatError("the provider returned an invalid response")
         return raw
 
-    def stream(
-        self,
-        messages: list[dict[str, str]],
-        model: str,
-        system_prompt: str,
-    ) -> Iterator[str]:
+    def stream(self, messages: list[dict[str, str]], model: str, system_prompt: str) -> Iterator[str]:
         client = _client(self.timeout)
         try:
-            chunks = client.models.generate_content_stream(
-                model=model,
-                contents=_contents(messages),
-                config=_config(system_prompt),
-            )
+            chunks = client.models.generate_content_stream(model=model, contents=_contents(messages), config=_config(system_prompt))
             for chunk in chunks:
                 text = chunk.text or ""
                 if text:
@@ -85,10 +63,7 @@ def _client(timeout: float) -> genai.Client:
     key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not key:
         raise ChatError("GEMINI_API_KEY is not configured")
-    return genai.Client(
-        api_key=key,
-        http_options=types.HttpOptions(timeout=gemini_timeout_ms(timeout)),
-    )
+    return genai.Client(api_key=key, http_options=types.HttpOptions(timeout=gemini_timeout_ms(timeout)))
 
 
 def _config(system_prompt: str) -> types.GenerateContentConfig:

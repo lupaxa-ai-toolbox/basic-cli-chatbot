@@ -12,14 +12,7 @@ from lupaxa.basic_cli_chatbot.chat import SYSTEM_PROMPT
 from lupaxa.basic_cli_chatbot.providers.errors import ChatError
 from lupaxa.basic_cli_chatbot.providers.gemini import GeminiProvider
 
-_ENV_VARS = (
-    "BASIC_CLI_CHATBOT_PROVIDER",
-    "BASIC_CLI_CHATBOT_MODEL",
-    "BASIC_CLI_CHATBOT_TIMEOUT",
-    "OPENAI_API_KEY",
-    "GEMINI_API_KEY",
-    "XAI_API_KEY",
-)
+_ENV_VARS = ("BASIC_CLI_CHATBOT_PROVIDER", "BASIC_CLI_CHATBOT_MODEL", "BASIC_CLI_CHATBOT_TIMEOUT", "OPENAI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
 @pytest.fixture(autouse=True)
@@ -66,10 +59,7 @@ class _Client:
 
 def _provider(monkeypatch: pytest.MonkeyPatch, client: _Client) -> GeminiProvider:
     monkeypatch.setenv("GEMINI_API_KEY", "gk-test")
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.gemini.genai.Client",
-        lambda **_kwargs: client,
-    )
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.gemini.genai.Client", lambda **_kwargs: client)
     return GeminiProvider(60)
 
 
@@ -110,10 +100,7 @@ def test_timeout_is_milliseconds(monkeypatch: pytest.MonkeyPatch) -> None:
         return _Client()
 
     monkeypatch.setenv("GEMINI_API_KEY", "gk-test")
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.gemini.genai.Client",
-        fake_client,
-    )
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.gemini.genai.Client", fake_client)
     assert GeminiProvider(30.5).list_models() == ["gemini-a", "gemini-b"]
     options = seen["http_options"]
     assert isinstance(options, types.HttpOptions)

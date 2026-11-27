@@ -56,7 +56,7 @@ jobs:
         uses: lupaxa-actions-toolbox/get-language-versions@7dda2912be25435b135d3b1b25eefe0b23801f2a  # v0.1.5
         with:
           language: python
-          min-version: "3.10"
+          min-version: "3.11"
           remove-patch-version: true
 
   python-ci:

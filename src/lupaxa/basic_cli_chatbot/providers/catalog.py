@@ -14,21 +14,9 @@ class ProviderFacts(NamedTuple):
 
 
 CATALOG: dict[str, ProviderFacts] = {
-    "openai": ProviderFacts(
-        mode="Remote",
-        api_key_env="OPENAI_API_KEY",
-        timeout_seconds=60,
-    ),
-    "gemini": ProviderFacts(
-        mode="Remote",
-        api_key_env="GEMINI_API_KEY",
-        timeout_seconds=60,
-    ),
-    "grok": ProviderFacts(
-        mode="Remote",
-        api_key_env="XAI_API_KEY",
-        timeout_seconds=60,
-    ),
+    "openai": ProviderFacts(mode="Remote", api_key_env="OPENAI_API_KEY", timeout_seconds=60),
+    "gemini": ProviderFacts(mode="Remote", api_key_env="GEMINI_API_KEY", timeout_seconds=60),
+    "grok": ProviderFacts(mode="Remote", api_key_env="XAI_API_KEY", timeout_seconds=60),
     "ollama": ProviderFacts(mode="Local", api_key_env=None, timeout_seconds=300),
 }
 

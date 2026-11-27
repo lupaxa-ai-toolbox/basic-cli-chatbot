@@ -11,14 +11,7 @@ from lupaxa.basic_cli_chatbot.chat import SYSTEM_PROMPT
 from lupaxa.basic_cli_chatbot.providers.errors import ChatError
 from lupaxa.basic_cli_chatbot.providers.grok import GrokProvider
 
-_ENV_VARS = (
-    "BASIC_CLI_CHATBOT_PROVIDER",
-    "BASIC_CLI_CHATBOT_MODEL",
-    "BASIC_CLI_CHATBOT_TIMEOUT",
-    "OPENAI_API_KEY",
-    "GEMINI_API_KEY",
-    "XAI_API_KEY",
-)
+_ENV_VARS = ("BASIC_CLI_CHATBOT_PROVIDER", "BASIC_CLI_CHATBOT_MODEL", "BASIC_CLI_CHATBOT_TIMEOUT", "OPENAI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
 @pytest.fixture(autouse=True)
@@ -123,18 +116,9 @@ def _install(monkeypatch: pytest.MonkeyPatch, outcome: dict[str, Any]) -> list[_
         return client
 
     monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.grok.Client", factory)
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.grok.system",
-        lambda text: ("system", text),
-    )
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.grok.user",
-        lambda text: ("user", text),
-    )
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.grok.assistant",
-        lambda text: ("assistant", text),
-    )
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.grok.system", lambda text: ("system", text))
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.grok.user", lambda text: ("user", text))
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.grok.assistant", lambda text: ("assistant", text))
     return created
 
 
@@ -187,10 +171,7 @@ def test_blank_key_does_not_construct_a_client(monkeypatch: pytest.MonkeyPatch) 
 
 def test_stream_yields_deltas(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("XAI_API_KEY", "xai-test")
-    created = _install(
-        monkeypatch,
-        {"chunks": [_Chunk("fo"), _Chunk(""), _Chunk("ur")]},
-    )
+    created = _install(monkeypatch, {"chunks": [_Chunk("fo"), _Chunk(""), _Chunk("ur")]})
     provider = GrokProvider(60)
     assert list(provider.stream([{"role": "user", "content": "hi"}], "grok-4.6", SYSTEM_PROMPT)) == [
         "fo",
@@ -201,10 +182,7 @@ def test_stream_yields_deltas(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_list_models_returns_names(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("XAI_API_KEY", "xai-test")
-    created = _install(
-        monkeypatch,
-        {"models": [_Named("grok-4.6"), _Named("grok-4")]},
-    )
+    created = _install(monkeypatch, {"models": [_Named("grok-4.6"), _Named("grok-4")]})
     provider = GrokProvider(60)
     assert provider.list_models() == ["grok-4.6", "grok-4"]
     assert created[0].closed is True
@@ -227,21 +205,12 @@ def test_unknown_role_is_invalid(monkeypatch: pytest.MonkeyPatch) -> None:
         (grpc.StatusCode.RESOURCE_EXHAUSTED, "bad", "Grok rate limit reached"),
         (grpc.StatusCode.DEADLINE_EXCEEDED, "bad", "Grok request timed out"),
         (grpc.StatusCode.NOT_FOUND, "bad", "model 'grok-4.6' is not available"),
-        (
-            grpc.StatusCode.INVALID_ARGUMENT,
-            "maximum context length exceeded",
-            "the conversation is too long for this model",
-        ),
+        (grpc.StatusCode.INVALID_ARGUMENT, "maximum context length exceeded", "the conversation is too long for this model"),
         (grpc.StatusCode.UNAVAILABLE, "bad", "Grok is unavailable"),
         (grpc.StatusCode.INTERNAL, "bad", "Grok is unavailable"),
     ],
 )
-def test_status_maps_to_the_grok_message(
-    monkeypatch: pytest.MonkeyPatch,
-    code: grpc.StatusCode,
-    details: str,
-    expected: str,
-) -> None:
+def test_status_maps_to_the_grok_message(monkeypatch: pytest.MonkeyPatch, code: grpc.StatusCode, details: str, expected: str) -> None:
     monkeypatch.setenv("XAI_API_KEY", "xai-test")
     _install(monkeypatch, {"sample": _RpcError(code, details)})
     provider = GrokProvider(60)

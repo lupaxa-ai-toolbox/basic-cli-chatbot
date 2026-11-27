@@ -25,11 +25,7 @@ def trim(conversation: list[dict[str, str]], max_context_messages: int) -> None:
         del conversation[:2]
 
 
-def begin_turn(
-    question: str,
-    conversation: list[dict[str, str]],
-    max_context_messages: int,
-) -> None:
+def begin_turn(question: str, conversation: list[dict[str, str]], max_context_messages: int) -> None:
     """Append the user row, then trim."""
     conversation.append({"role": "user", "content": question})
     trim(conversation, max_context_messages)
@@ -46,14 +42,7 @@ def fail_turn(conversation: list[dict[str, str]]) -> None:
         conversation.pop()
 
 
-def ask(
-    question: str,
-    conversation: list[dict[str, str]],
-    provider: Provider,
-    model: str,
-    *,
-    max_context_messages: int,
-) -> str:
+def ask(question: str, conversation: list[dict[str, str]], provider: Provider, model: str, *, max_context_messages: int) -> str:
     """Append one user turn, request a reply, and append that reply."""
     begin_turn(question, conversation, max_context_messages)
     try:

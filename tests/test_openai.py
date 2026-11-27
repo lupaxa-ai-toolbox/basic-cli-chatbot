@@ -5,30 +5,13 @@ from __future__ import annotations
 from typing import Any, Literal, cast
 
 import pytest
-from openai import (
-    APIConnectionError,
-    APIStatusError,
-    APITimeoutError,
-    AuthenticationError,
-    BadRequestError,
-    InternalServerError,
-    NotFoundError,
-    PermissionDeniedError,
-    RateLimitError,
-)
+from openai import APIConnectionError, APIStatusError, APITimeoutError, AuthenticationError, BadRequestError, InternalServerError, NotFoundError, PermissionDeniedError, RateLimitError
 
 from lupaxa.basic_cli_chatbot.chat import SYSTEM_PROMPT
 from lupaxa.basic_cli_chatbot.providers.errors import ChatError
 from lupaxa.basic_cli_chatbot.providers.openai import OpenAIProvider
 
-_ENV_VARS = (
-    "BASIC_CLI_CHATBOT_PROVIDER",
-    "BASIC_CLI_CHATBOT_MODEL",
-    "BASIC_CLI_CHATBOT_TIMEOUT",
-    "OPENAI_API_KEY",
-    "GEMINI_API_KEY",
-    "XAI_API_KEY",
-)
+_ENV_VARS = ("BASIC_CLI_CHATBOT_PROVIDER", "BASIC_CLI_CHATBOT_MODEL", "BASIC_CLI_CHATBOT_TIMEOUT", "OPENAI_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY")
 
 
 @pytest.fixture(autouse=True)
@@ -96,16 +79,9 @@ class _Client:
         self.models = _Models(["gpt-a", "gpt-b"])
 
 
-def _provider(
-    monkeypatch: pytest.MonkeyPatch,
-    client: _Client,
-    timeout: float = 60.0,
-) -> OpenAIProvider:
+def _provider(monkeypatch: pytest.MonkeyPatch, client: _Client, timeout: float = 60.0) -> OpenAIProvider:
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.openai.OpenAI",
-        lambda **_kwargs: client,
-    )
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.openai.OpenAI", lambda **_kwargs: client)
     return OpenAIProvider(timeout)
 
 
@@ -142,10 +118,7 @@ def test_timeout_is_seconds(monkeypatch: pytest.MonkeyPatch) -> None:
         return client
 
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
-    monkeypatch.setattr(
-        "lupaxa.basic_cli_chatbot.providers.openai.OpenAI",
-        fake_openai,
-    )
+    monkeypatch.setattr("lupaxa.basic_cli_chatbot.providers.openai.OpenAI", fake_openai)
     provider = OpenAIProvider(30.5)
     assert provider.chat([], "m", SYSTEM_PROMPT) == "four"
     assert seen["timeout"] == 30.5
@@ -196,10 +169,7 @@ def _status(cls: type[APIStatusError], status: int, message: str) -> APIStatusEr
         (_status(AuthenticationError, 401, "nope"), "OpenAI authentication failed"),
         (_status(PermissionDeniedError, 403, "nope"), "OpenAI authentication failed"),
         (_status(RateLimitError, 429, "nope"), "OpenAI rate limit reached"),
-        (
-            APITimeoutError(cast(Any, _HTTPRequest())),
-            "OpenAI request timed out",
-        ),
+        (APITimeoutError(cast(Any, _HTTPRequest())), "OpenAI request timed out"),
         (_status(NotFoundError, 404, "missing"), "model 'some-model' is not available"),
         (_status(InternalServerError, 500, "down"), "OpenAI is unavailable"),
     ],
